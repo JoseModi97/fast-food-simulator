@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             simulationRunning = true;
             console.log('Simulation Started');
             const arrivalInterval = parseInt(arrivalIntervalInput.value, 10);
-            customerArrivalInterval = setInterval(this.generateCustomer, arrivalInterval);
+            customerArrivalInterval = setInterval(this.generateCustomer.bind(this), arrivalInterval);
         },
 
         stop() {
