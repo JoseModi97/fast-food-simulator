@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const arrivalIntervalInput = document.getElementById('arrival-interval');
     const fulfillmentIntervalInput = document.getElementById('fulfillment-interval');
-    const numCooksInput = document.getElementById('num-cooks');
     const startSimButton = document.getElementById('start-sim');
     const stopSimButton = document.getElementById('stop-sim');
 
@@ -21,23 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let orderIdCounter = 1;
     let customerArrivalInterval;
     const customerQueue = [];
+    const orderQueue = [];
     const pickupQueue = [];
-    let cookManager;
 
     // --- Actors ---
     class Customer {
         constructor(id) {
             this.id = id;
             this.orderId = null;
-        }
-
-        pickupOrder() {
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    console.log(`Customer #${this.id} picked up order #${this.orderId}`);
-                    resolve(this);
-                }, 1000); // 1 second to pick up order
-            });
         }
     }
 
@@ -54,59 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     class Cook {
-        constructor(id) {
-            this.id = id;
-            this.busy = false;
-        }
-
-        cookOrder(customer) {
-            this.busy = true;
+        static cookOrder(customer) {
             return new Promise(resolve => {
-                console.log(`Cook #${this.id}: Starting to cook order #${customer.orderId}`);
+                console.log(`Cook: Starting to cook order #${customer.orderId}`);
+                updateUI('cooking-order', `#${customer.orderId}`);
                 const fulfillmentInterval = parseInt(fulfillmentIntervalInput.value, 10);
                 setTimeout(() => {
-                    console.log(`Cook #${this.id}: Finished cooking order #${customer.orderId}`);
-                    this.busy = false;
+                    console.log(`Cook: Finished cooking order #${customer.orderId}`);
                     resolve(customer);
                 }, fulfillmentInterval);
             });
-        }
-    }
-
-    class CookManager {
-        constructor(numCooks) {
-            this.cooks = [];
-            for (let i = 1; i <= numCooks; i++) {
-                this.cooks.push(new Cook(i));
-            }
-            this.orderQueue = [];
-        }
-
-        addOrder(customer) {
-            return new Promise(resolve => {
-                this.orderQueue.push({ customer, resolve });
-                this.assignOrder();
-            });
-        }
-
-        assignOrder() {
-            if (this.orderQueue.length > 0) {
-                const availableCook = this.cooks.find(cook => !cook.busy);
-                if (availableCook) {
-                    const { customer, resolve } = this.orderQueue.shift();
-                    updateUI('cooking-order', `#${customer.orderId}`);
-                    availableCook.cookOrder(customer)
-                        .then(customer => {
-                            resolve(customer);
-                            this.assignOrder();
-                        });
-                }
-            }
-            this.updateKitchenQueueUI();
-        }
-
-        updateKitchenQueueUI() {
-            kitchenQueueSpan.textContent = this.orderQueue.map(o => `#${o.customer.orderId}`).join(', ');
         }
     }
 
@@ -126,8 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (simulationRunning) return;
             simulationRunning = true;
             console.log('Simulation Started');
-            const numCooks = parseInt(numCooksInput.value, 10);
-            cookManager = new CookManager(numCooks);
             const arrivalInterval = parseInt(arrivalIntervalInput.value, 10);
             customerArrivalInterval = setInterval(this.generateCustomer.bind(this), arrivalInterval);
         },
@@ -146,19 +91,22 @@ document.addEventListener('DOMContentLoaded', () => {
             this.updateCustomerQueueUI();
 
             OrderTaker.takeOrder(customer)
-                .then(customer => cookManager.addOrder(customer))
-                .then(customer => Server.serveOrder(customer))
                 .then(customer => {
-                    pickupQueue.push(customer);
-                    this.updatePickupQueueUI(true);
-                    return customer.pickupOrder();
+                    orderQueue.push(customer);
+                    this.updateKitchenQueueUI();
+                    return Cook.cookOrder(customer);
                 })
                 .then(customer => {
-                    const index = pickupQueue.findIndex(c => c.id === customer.id);
+                    const index = orderQueue.findIndex(c => c.id === customer.id);
                     if (index > -1) {
-                        pickupQueue.splice(index, 1);
+                        orderQueue.splice(index, 1);
                     }
-                    this.updatePickupQueueUI(false);
+                    this.updateKitchenQueueUI();
+                    return Server.serveOrder(customer);
+                })
+                .then(customer => {
+                    pickupQueue.push(customer);
+                    this.updatePickupQueueUI();
                 });
         },
 
@@ -167,21 +115,18 @@ document.addEventListener('DOMContentLoaded', () => {
             customerQueueDiv.innerHTML = customerQueue.map(c => `<div class="customer">🧍‍♂️</div>`).join('');
         },
 
-        updatePickupQueueUI(isAdding) {
+        updateKitchenQueueUI() {
+            kitchenQueueSpan.textContent = orderQueue.map(c => `#${c.orderId}`).join(', ');
+        },
+
+        updatePickupQueueUI() {
             pickupLineCountSpan.textContent = pickupQueue.length;
             pickupQueueDiv.innerHTML = pickupQueue.map(c => `<div class="customer">🍔</div>`).join('');
-
-            if (isAdding) {
-                const index = customerQueue.findIndex(cust => cust.id === pickupQueue[pickupQueue.length - 1].id);
-                if (index > -1) {
-                    customerQueue.splice(index, 1);
-                }
-            } else if (pickupQueue.length > 0) {
-                readyForPickupSpan.textContent = `#${pickupQueue[pickupQueue.length - 1].orderId}`;
-            } else {
-                readyForPickupSpan.textContent = '#0';
+            // Remove the customer from the original waiting line
+            const index = customerQueue.findIndex(cust => cust.id === pickupQueue[pickupQueue.length-1].id);
+            if(index > -1) {
+                customerQueue.splice(index, 1);
             }
-
             this.updateCustomerQueueUI();
         }
     };
