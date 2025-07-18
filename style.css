@@ -1,0 +1,43 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+.input-area,
+.order-line-area,
+.order-area,
+.kitchen-area,
+.pickup-area {
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+    background-color: #0078d4;
+    border-color: #0078d4;
+}
+
+.btn-primary:hover {
+    background-color: #005a9e;
+    border-color: #005a9e;
+}
+
+.btn-danger {
+    background-color: #e81123;
+    border-color: #e81123;
+}
+
+.btn-danger:hover {
+    background-color: #b30f1b;
+    border-color: #b30f1b;
+}
+
+#customer-queue .customer,
+#pickup-queue .customer {
+    font-size: 2rem;
+    margin: 0.5rem;
+}

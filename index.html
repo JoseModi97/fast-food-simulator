@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast Food Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fluent-ui-web@1.0.0/dist/css/fluent-ui.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">🎮 Fast Food Simulator</h1>
+
+        <div class="row mb-3">
+            <div class="col">
+                <div class="input-area p-3 border rounded">
+                    <h2>Input Area</h2>
+                    <div class="row g-3 align-items-center">
+                        <div class="col-auto">
+                            <label for="arrival-interval" class="col-form-label">Arrival Interval (ms)</label>
+                        </div>
+                        <div class="col-auto">
+                            <input type="number" id="arrival-interval" class="form-control" value="2000">
+                        </div>
+                        <div class="col-auto">
+                            <label for="fulfillment-interval" class="col-form-label">Fulfillment Interval (ms)</label>
+                        </div>
+                        <div class="col-auto">
+                            <input type="number" id="fulfillment-interval" class="form-control" value="5000">
+                        </div>
+                        <div class="col-auto">
+                            <button id="start-sim" class="btn btn-primary">Start</button>
+                            <button id="stop-sim" class="btn btn-danger">Stop</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="order-line-area p-3 border rounded mb-3">
+                    <h2>Order Line</h2>
+                    <p>Customers Waiting: <span id="customers-waiting">0</span></p>
+                    <div id="customer-queue" class="d-flex flex-wrap"></div>
+                </div>
+                <div class="order-area p-3 border rounded mb-3">
+                    <h2>Order Area</h2>
+                    <p>Order Taken: <span id="order-taken">#0</span></p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="kitchen-area p-3 border rounded mb-3">
+                    <h2>Kitchen Area</h2>
+                    <p>Cooking Order: <span id="cooking-order">#0</span></p>
+                    <p>Queue: <span id="kitchen-queue"></span></p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="pickup-area p-3 border rounded">
+                    <h2>Pickup Area</h2>
+                    <p>Ready for Pickup: <span id="ready-for-pickup">#0</span></p>
+                    <p>Customers in Pickup Line: <span id="pickup-line-count">0</span></p>
+                    <div id="pickup-queue" class="d-flex flex-wrap"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
