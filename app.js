@@ -29,6 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
             this.id = id;
             this.orderId = null;
         }
+
+        pickupOrder() {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    console.log(`Customer #${this.id} picked up order #${this.orderId}`);
+                    resolve(this);
+                }, 1000); // 1 second to pick up order
+            });
+        }
     }
 
     class OrderTaker {
@@ -106,7 +115,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .then(customer => {
                     pickupQueue.push(customer);
-                    this.updatePickupQueueUI();
+                    this.updatePickupQueueUI(true);
+                    return customer.pickupOrder();
+                })
+                .then(customer => {
+                    const index = pickupQueue.findIndex(c => c.id === customer.id);
+                    if (index > -1) {
+                        pickupQueue.splice(index, 1);
+                    }
+                    this.updatePickupQueueUI(false);
                 });
         },
 
@@ -119,14 +136,21 @@ document.addEventListener('DOMContentLoaded', () => {
             kitchenQueueSpan.textContent = orderQueue.map(c => `#${c.orderId}`).join(', ');
         },
 
-        updatePickupQueueUI() {
+        updatePickupQueueUI(isAdding) {
             pickupLineCountSpan.textContent = pickupQueue.length;
             pickupQueueDiv.innerHTML = pickupQueue.map(c => `<div class="customer">🍔</div>`).join('');
-            // Remove the customer from the original waiting line
-            const index = customerQueue.findIndex(cust => cust.id === pickupQueue[pickupQueue.length-1].id);
-            if(index > -1) {
-                customerQueue.splice(index, 1);
+
+            if (isAdding) {
+                const index = customerQueue.findIndex(cust => cust.id === pickupQueue[pickupQueue.length - 1].id);
+                if (index > -1) {
+                    customerQueue.splice(index, 1);
+                }
+            } else if (pickupQueue.length > 0) {
+                readyForPickupSpan.textContent = `#${pickupQueue[pickupQueue.length - 1].orderId}`;
+            } else {
+                readyForPickupSpan.textContent = '#0';
             }
+
             this.updateCustomerQueueUI();
         }
     };
