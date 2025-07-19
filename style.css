@@ -41,3 +41,15 @@ body {
     font-size: 2rem;
     margin: 0.5rem;
 }
+
+.btn .spinner-border {
+    display: none;
+}
+
+.btn.loading .spinner-border {
+    display: inline-block;
+}
+
+.btn.loading {
+    cursor: not-allowed;
+}

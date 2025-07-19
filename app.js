@@ -72,9 +72,18 @@ document.addEventListener('DOMContentLoaded', () => {
         start() {
             if (simulationRunning) return;
             simulationRunning = true;
+
+            startSimButton.classList.add('loading');
+            startSimButton.disabled = true;
+
             console.log('Simulation Started');
             const arrivalInterval = parseInt(arrivalIntervalInput.value, 10);
             customerArrivalInterval = setInterval(this.generateCustomer.bind(this), arrivalInterval);
+
+            setTimeout(() => {
+                startSimButton.classList.remove('loading');
+                // The button remains disabled while the simulation is running
+            }, 1000);
         },
 
         stop() {
